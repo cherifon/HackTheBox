@@ -183,7 +183,7 @@ Trying to login with the default credentials `administrator:radius` (found on th
 
 IT WORKS ! We are logged in as an operator.
 
-![Operator Dashboard](ressources/dashboard.JPG)
+![Operator Dashboard](ressources/dashboard.jpg)
 
 Going to the `Users` tab, we can see a unique user *svcMosh*, with a hashed password `412DD4759978ACFCC81DEAB01B382403`.
 
