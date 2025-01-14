@@ -2,6 +2,8 @@
 
 ## Description
 
+This is the HackTheBox description for the challenge:
+
 Forela carry out penetration testing of their internal networks utilising an internal team within their security department. The security team have notes from tests in addition to company critical credentials. It seems their host may have been compromised. Please verify how this occurred using the retrospective collection provided.
 
 ## Psittaciformes.zip 
