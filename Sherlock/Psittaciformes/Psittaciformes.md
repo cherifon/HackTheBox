@@ -234,3 +234,70 @@ The MITRE technique ID utilized by the attacker to persist is `T1053.003`.
 
 ### 8. What is the Mitre Att&ck ID for the technique relevant to the binary the attacker runs?
 
+In order to answer this question, we need to downlorad the `blob.zip` file and extract it. 
+
+![blob](resources/blob.JPG)
+
+Trying to understand the `blob` binary file is a bit tricky, but I noticed that the `config.json` had a sort of crypto related part :
+
+```json
+"pools": [
+        {
+            "algo": null,
+            "coin": "XMR",
+            "url": "xmr.kryptex.network:7777",
+            "user": "48edfHu7V9Z84YzzMa6fUueoELZ9ZRXq9VetWzYGzKt52XU5xvqgzYnDK9URnRoJMk1j8nLwEVsaSWJ4fhdUyZijBGUicoD/MyFirstRig",
+            "pass": "x",
+            "rig-id": null,
+            "nicehash": false,
+            "keepalive": true,
+            "enabled": true,
+            "tls": false,
+            "tls-fingerprint": null,
+            "daemon": false,
+            "socks5": null,
+            "self-select": null,
+            "submit-to-origin": false
+        }
+    ]
+```
+
+It just looks like a mining pool configuration.
+Running a `strings` command on the `blob` binary file, we can see that the binary is a miner. 
+
+```bash
+id-Gost28147-89-CryptoPro-KeyMeshing
+id-Gost28147-89-None-KeyMeshing
+id-GostR3411-94-CryptoProParamSet
+id-Gost28147-89-CryptoPro-A-ParamSet
+id-Gost28147-89-CryptoPro-B-ParamSet
+id-Gost28147-89-CryptoPro-C-ParamSet
+id-Gost28147-89-CryptoPro-D-ParamSet
+id-Gost28147-89-CryptoPro-Oscar-1-1-ParamSet
+id-Gost28147-89-CryptoPro-Oscar-1-0-ParamSet
+```
+
+```bash	
+[1;30m%s
+[1;30mfingerprint (SHA-256): "%s"
+[1;37mdev donate finished
+[0;31mno active pools, stop mining
+[1;35mnew job
+```
+
+```bash
+invalid mining.authorize response: result is not a boolean
+invalid mining.subscribe response: extra nonce is not a string
+invalid mining.subscribe response: extra nonce has an odd number of hex chars
+Invalid mining.subscribe response: extra nonce is too long
+```
+
+All these strings are related to mining. The Mitre Att&ck ID for the technique relevant to the binary the attacker runs is `T1496`, which is `Resource Hijacking`.
+
+Thank you for reading, I hope you enjoyed it.
+
+## Conclusion 
+
+This sherlock was pretty easy and once you are able to answer the first question, the rest is just a matter of following the trail. The only difficulty is to not get overloaded by the information and the big number of files and directories at the beginning. The last part was a bit tricky, but with some research, we can easily find the answer. I hope you found this report helpful and informative. If you have any questions or feedback, please feel free to [send me an email](mailto:cherifjebali0301@gmail.com). Thank you for reading!
+
+This report was written by Cherif Jebali. You can find me on [LinkedIn](https://www.linkedin.com/in/cherif-jebali-a248a1241/)
