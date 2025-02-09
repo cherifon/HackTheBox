@@ -6,8 +6,8 @@ This repository contains writeups for machines, challenges and Sherlocks from [H
 
 | Name | OS | Difficulty | Writeup |
 |------|----|------------|---------|
-| [UnderPass](https://app.hackthebox.com/machines/UnderPass) | Linux | Easy | [Writeup](machines/UnderPass/UnderPass.md) |
-| [Alert](https://app.hackthebox.com/machines/Alert) | Linux | Easy | [Writeup](machines/Alert/Alert.md) |
+| [UnderPass](https://app.hackthebox.com/machines/UnderPass) | Linux | Easy | [Writeup](Machines/UnderPass/UnderPass.md) |
+| [Alert](https://app.hackthebox.com/machines/Alert) | Linux | Easy | [Writeup](Machines/Alert/Alert.md) |
 
 ## Sherlocks 
 
