@@ -29,4 +29,4 @@ Every single writeup is written by me, Cherif Jebali, and any relation to other 
 
 ## Contact 
 
-For questions or suggestions, contact [mailto:cherifjebali0301@gmail.com](cherifjebali0301@gmail.com).
+For questions or suggestions, contact [cherifjebali0301@gmail.com](cherifjebali0301@gmail.com).
