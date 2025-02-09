@@ -251,7 +251,7 @@ Add `statistics.alert.htb` to the `/etc/hosts` file.
 
 According to [apache.porg](https://httpd.apache.org/docs/2.4/programs/htpasswd.html) and [digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-apache-on-ubuntu-20-04), the passwords are stored in `/var/www/your_domain/.htpasswd`: *htpasswd is used to create and update the flat-files used to store usernames and password for basic authentication of HTTP users.*
 
-Let's try to read the `.htaccess` file.
+Let's try to read the `.htpasswd` file.
 
 ```markdown
 <script>
